@@ -5,8 +5,8 @@ library(sf)
 library(ggplot2)
 library(plotly)
 library(viridis)
-library(rmapshaper)  # Para simplificar polígonos
-library(cowplot)     # Para combinar los plots
+library(rmapshaper)  
+library(cowplot)     
 
 # Cargamos los datos
 datos <- read.csv('datos.csv', sep = ",")
@@ -69,8 +69,8 @@ ui <- fluidPage(
                fluidRow(
                  column(6,
                         radioButtons("metrica", "Selecciona Métrica:",
-                                     choices = c("Total de residuos" = "Total",
-                                                 "Porcentaje de residuo por habitante" = "Porcentaje_por_poblacion"))
+                                     choices = c("Total de residuos en [to]" = "Total",
+                                                 "Toneladas por habitante" = "Porcentaje_por_poblacion"))
                  ),
                  column(6,
                         sliderInput("year",
@@ -145,21 +145,21 @@ server <- function(input, output, session) {
       scale_fill_viridis_c(option = "YlOrRd", 
                            na.value = "#FFFFFF",
                            limits = c(0, max_total), 
-                           name = if (input$metrica == "Porcentaje_por_poblacion") "Porcentaje" else "Total de residuos",
-                           guide = guide_colorbar(barwidth = 15, barheight = 1)) +  # Ajusta barwidth según necesites
+                           name = if (input$metrica == "Porcentaje_por_poblacion") "Toneladas por habitante" else "Total de residuos en [to]",
+                           guide = guide_colorbar(barwidth = 15, barheight = 1)) + 
       theme_minimal() +
       theme(
-        panel.grid = element_blank(),             # Eliminar cuadrículas
-        axis.title = element_blank(),             # Eliminar títulos de los ejes
-        axis.text = element_blank(),              # Eliminar etiquetas de los ejes
-        axis.ticks = element_blank(),             # Eliminar marcas de los ejes
+        panel.grid = element_blank(),             
+        axis.title = element_blank(),            
+        axis.text = element_blank(),              
+        axis.ticks = element_blank(),             
         legend.position = "top",
-        legend.text = element_text(size = 12),    # Tamaño de la fuente de la leyenda
-        legend.title = element_text(size = 14),   # Tamaño del título de la leyenda
-        legend.key.width = unit(2, "cm"),         # Ancho de la clave de la leyenda
-        plot.title = element_text(size = 14)      # Tamaño del título
+        legend.text = element_text(size = 12),    
+        legend.title = element_text(size = 14),   
+        legend.key.width = unit(2, "cm"),         
+        plot.title = element_text(size = 14)      
       ) +
-      ggtitle(paste(if(input$metrica =="Porcentaje_por_poblacion"){"Porcentaje de residuo por habitante\n"} else {"Toneladas totales de\n"},input$residuo, "para el año", input$year))
+      ggtitle(paste(if(input$metrica =="Porcentaje_por_poblacion"){"Toneladas por habitante en\n"} else {"Toneladas totales de\n"},input$residuo, "para el año", input$year))
     
     plot_canarias <- ggplot() +
       geom_sf(data = canarias_merged, aes(fill = metric), color = "#000000", size = 0.2) +
@@ -187,7 +187,7 @@ server <- function(input, output, session) {
     
     if (input$metrica == "Porcentaje_por_poblacion") {
       data_for_plot$metric <- data_for_plot$Porcentaje_por_poblacion
-      y_title <- "Porcentaje de residuo por población"
+      y_title <- "Toneladas por habitante"
     } else {
       data_for_plot$metric <- data_for_plot$Total
       y_title <- "Toneladas de residuos"
@@ -250,10 +250,10 @@ server <- function(input, output, session) {
       text = ~paste(
         "Comunidad: ", Comunidad, "<br>",
         "PIB per cápita [€]: ", PIB_PC, "<br>",
-        "Porcentaje de residuo por habitante: ", Porcentaje_por_poblacion, "<br>",
+        "Toneladas por habitante: ", Porcentaje_por_poblacion, "<br>",
         "Población: ", Poblacion, "<br>",
         if (input$metrica == "Porcentaje_por_poblacion") {
-          paste("Porcentaje de residuo por habitante: ", Porcentaje_por_poblacion)
+          paste("Toneladas por habitante: ", Porcentaje_por_poblacion)
         } else {
           paste("Total de residuos [to]: ", Total)
         }
@@ -269,11 +269,11 @@ server <- function(input, output, session) {
     ) %>%
       layout(
         title = list(
-          text = paste("Relación entre PIB per cápita y el porcentaje de residuos por habitante en<br>", input$residuo, " para el año ", input$year),
+          text = paste("Relación entre PIB per cápita y la toneladas por habitante en<br>", input$residuo, " para el año ", input$year),
           font = list(size = 14)
         ),
         xaxis = list(title = "PIB per cápita [€]"),
-        yaxis = list(title = "Porcentaje de residuo por población"),
+        yaxis = list(title = "Tonelada por habitante"),
         margin = list(l = 50, r = 50, b = 100, t = 100)
       )
     plot
@@ -282,5 +282,6 @@ server <- function(input, output, session) {
 
 # Ejecutamos la aplicación
 shinyApp(ui = ui, server = server)
+
 
 
